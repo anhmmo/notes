@@ -1,12 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 
-function nsdgsg() {
-    console.log("hello");
-}
-
-nsdgsg();
-
 class App extends Component {
 
   constructor(props) {
