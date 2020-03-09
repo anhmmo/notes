@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
 
+function nsdgsg() {
+    console.log("hello");
+}
+
+nsdgsg();
+
 class App extends Component {
-  
+
   constructor(props) {
    
     super(props);
@@ -32,10 +38,10 @@ class App extends Component {
   }
 
 
-  toggleTodo = (todo) => this.setState({ todoItems:
-    this.state.todoItems.map(item => item.action === todo.action ? { ...item, done: !item.done } : item) });
+  toggleTodo = (todoItem) => this.setState({ todoItems:
+    this.state.todoItems.map(item => item.action === todoItem.action ? { ...item, done: item.done === false } : item) });
 
-  todoTableRows = () => this.state.todoItems.map(item => 
+  todoTableRows = () => this.state.todoItems.map(item =>
     <tr key={ item.action }>
       <td>{ item.action}</td>
       <td>
@@ -43,7 +49,7 @@ class App extends Component {
         onChange={ () => this.toggleTodo(item) } />
       </td>
     </tr> );
-
+  
   render = () => {
     return (
       <div>
