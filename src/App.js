@@ -1,78 +1,88 @@
-import React, { Component } from 'react';
-import './App.css';
+import React, { useState, useEffect } from "react";
 
-class App extends Component {
+import NoteList from "./components/NoteList";
+import AddNote from "./components/AddNote";
+import noteService from "./services/notes";
 
-  constructor(props) {
-   
-    super(props);
-    this.state = {
-      userName: "Adam",
-      todoItems: [{ action: "Buy Flowers", done: false },
-                  { action: "Get Shoes", done: false },
-                  { action: "Collect Tickets", done: true },
-                  { action: "Call Joe", done: false }],
-      newItemText: ""
-    }
-    
-  }
+function App() {
+  const [notes, setNotes] = useState([]);
+  const [inputValue, setInput] = useState("");
+  const [showAll, setShowAll] = useState(true);
 
-  updateNewTextValue = (event) => {
-    this.setState({ newItemText: event.target.value });
-  }
-
-  createNewTodo = () => {
-    if (!this.state.todoItems.find(item => item.action === this.state.newItemText)) {
-      this.setState({
-      todoItems: [...this.state.todoItems,
-      { action: this.state.newItemText, done: false }],
-      newItemText: ""
+  useEffect(() => {
+    async function getNotesFromServer() {
+      let returnedNote = await noteService.getAll().catch((error) => {
+        console.log("fail");
       });
+      setNotes(returnedNote);
     }
-  }
+    getNotesFromServer();
+  }, []);
 
+  const addNewNote = async (event) => {
+    event.preventDefault();
+    const noteObject = {
+      content: inputValue,
+      date: new Date(),
+      important: Math.random() > 0.5,
+    };
 
-  toggleTodo = (todoItem) => this.setState({ todoItems:
-    this.state.todoItems.map(item => item.action === todoItem.action ? { ...item, done: item.done === false } : item) });
+    let returnedNote = await noteService.create(noteObject).catch((error) => {
+      alert(`cannot create notes`);
+    });
+    //console.log(returnedNote);
+    setNotes(notes.concat(returnedNote));
 
-  todoTableRows = () => this.state.todoItems.map(item =>
-    <tr key={ item.action }>
-      <td>{ item.action}</td>
-      <td>
-        <input type="checkbox" checked={ item.done }
-        onChange={ () => this.toggleTodo(item) } />
-      </td>
-    </tr> );
-  
-  render = () => {
-    return (
+    setInput("");
+  };
+  const onInputChange = (event) => {
+    setInput(event.target.value);
+  };
+
+  const toggleImportanceOf = async (id) => {
+    id = ++id;
+
+    const note = notes.find((item) => item.id === id);
+    console.log(note);
+
+    const changedNote = { ...note, important: !note.important };
+
+    noteService
+      .update(id, changedNote)
+      .then((returnedNote) =>
+        setNotes(
+          notes.map((note) => (note.id !== id ? note : (note = returnedNote)))
+        )
+      )
+      .catch((error) => {
+        console.log(
+          `the note '${note.content}' was already deleted from server`
+        );
+        setNotes(notes.filter((n) => n.id !== id));
+        // window.location.reload();
+      });
+  };
+
+  return (
+    <div className="App">
+      <h1>Notes</h1>
       <div>
-        <h4 className="bg-primary text-white text-center p-2">
-          { this.state.userName }'s To Do List
-          ({ this.state.todoItems.filter(item => item.done === false).length} items to do)
-        </h4>
-
-        <div className="container-fluid">
-          <div className="my-1">
-            <input className="form-control"
-              value={ this.state.newItemText }
-              onChange={ this.updateNewTextValue } />
-            <button className="btn btn-primary mt-1"
-              onClick={ this.createNewTodo }>Add</button>
-          </div>
-          <table className="table table-striped table-bordered">
-            <thead>
-              <tr><th>Description</th><th>Done</th></tr>
-            </thead>
-            <tbody>{ this.todoTableRows() }</tbody>
-          </table>
-        </div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? "important" : "all"}
+        </button>
       </div>
-    );
-  }
-
+      <NoteList
+        notes={notes}
+        toggleImportance={toggleImportanceOf}
+        showAll={showAll}
+      />
+      <AddNote
+        addNewNote={addNewNote}
+        onInputChange={onInputChange}
+        inputValue={inputValue}
+      />
+    </div>
+  );
 }
 
 export default App;
-
-
