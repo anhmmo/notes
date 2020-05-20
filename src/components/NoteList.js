@@ -7,7 +7,7 @@ function NoteList({ notes, toggleImportance, showAll }) {
     <ul>
       {showAll
         ? notes.map((item, index) => (
-            <li key={index}>
+            <li className="note" key={index}>
               {item.content}{" "}
               <button onClick={() => toggleImportance(index)}>
                 {item.important ? "make not important" : "make important"}
@@ -17,7 +17,7 @@ function NoteList({ notes, toggleImportance, showAll }) {
         : notes
             .filter((item) => item.important === true)
             .map((item, index) => (
-              <li key={index}>
+              <li className="note" key={index}>
                 {item.content}{" "}
                 <button onClick={() => toggleImportance(index)}>
                   {item.important ? "make not important" : "make important"}
